@@ -1,10 +1,4 @@
 import os
-from operator import itemgetter
-
-import bs4
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain.chains.history_aware_retriever import create_history_aware_retriever
-from langchain.chains.retrieval import create_retrieval_chain
 from langchain.chains.sql_database.query import create_sql_query_chain
 from langchain_chroma import Chroma
 from langchain_community.document_loaders import WebBaseLoader
@@ -19,10 +13,9 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 
 # 设置代理（如果需要）
-os.environ["HTTPS_PROXY"] = "http://127.0.0.1:1080"
-os.environ["HTTP_PROXY"] = "http://127.0.0.1:1080"
+os.environ["HTTPS_PROXY"] = "http://127.0.0.1:7897"
+os.environ["HTTP_PROXY"] = "http://127.0.0.1:7897"
 os.environ["LANGCHAIN_PROJECT"] = "LangchainDemo5"
-
 
 # 创建模型
 model = ChatOpenAI(
