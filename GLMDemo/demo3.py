@@ -1,10 +1,9 @@
 from langchain_chroma import Chroma
-from langchain_community.embeddings import ModelScopeEmbeddings
 from langchain_core.documents import Document
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnableWithMessageHistory, RunnableLambda, RunnablePassthrough
 from langchain_openai import ChatOpenAI
-
+from langchain_huggingface import HuggingFaceEmbeddings
 # 创建模型
 model = ChatOpenAI(
     model='glm-4-0520',
@@ -41,8 +40,7 @@ documents = [
 # https://www.modelscope.cn/models/iic/nlp_gte_sentence-embedding_chinese-large/summary
 # 在中文环境下推荐使用的Embeddings
 
-embeddings = ModelScopeEmbeddings(model_id='iic/nlp_gte_sentence-embedding_chinese-base')
-
+embeddings = HuggingFaceEmbeddings(model_name="BAAI/bge-base-zh")  # 适用于中文
 # 实例化一个向量数空间
 vector_store = Chroma.from_documents(documents, embedding=embeddings)
 
