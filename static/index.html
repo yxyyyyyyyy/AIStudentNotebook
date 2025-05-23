@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>备忘录 - 代办卡片风格</title>
+<style>
+  /* 整体布局，左右两栏 */
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+  }
+
+  .container {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* 左侧栏淡蓝色背景 */
+  .sidebar {
+    width: 220px;
+    background: #d6e9ff; /* 淡蓝色 */
+    color: #1a3e72;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 20px;
+    box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+  }
+
+  .sidebar h1 {
+    margin: 0 0 20px;
+    font-weight: 700;
+    font-size: 24px;
+  }
+
+  /* 右侧主内容 */
+  .main {
+    flex: 1;
+    padding: 30px 40px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* 卡片列表容器 */
+  #memoList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  /* 单个代办卡片样式 */
+  #memoList li {
+    list-style: none;
+    background: white;
+    padding: 20px 25px;
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    font-size: 16px;
+    color: #2c3e50;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  #memoList li:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+  }
+
+  /* 添加备忘录部分 */
+  .add-section {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+  #memoInput {
+    flex: 1;
+    min-width: 200px;
+    padding: 12px 16px;
+    font-size: 16px;
+    border: 2px solid #a8c6ff;
+    border-radius: 10px;
+    outline-offset: 2px;
+    outline-color: #4096ff;
+    transition: border-color 0.3s;
+  }
+  #memoInput:focus {
+    border-color: #4096ff;
+  }
+  button {
+    background: #4096ff;
+    border: none;
+    color: white;
+    font-size: 16px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color 0.3s;
+  }
+  button:hover {
+    background: #2c6cd1;
+  }
+
+  /* 响应式布局 */
+  @media (max-width: 720px) {
+    .container {
+      flex-direction: column;
+    }
+    .sidebar {
+      width: 100%;
+      padding: 20px 10px;
+      box-shadow: none;
+      flex-direction: row;
+      justify-content: center;
+    }
+    .sidebar h1 {
+      font-size: 20px;
+      margin: 0;
+    }
+    .main {
+      padding: 20px 15px;
+    }
+    .add-section {
+      flex-direction: column;
+    }
+    button {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <h1>备忘录</h1>
+    </aside>
+
+    <main class="main">
+      <ul id="memoList"></ul>
+
+      <div class="add-section">
+        <input type="text" id="memoInput" placeholder="输入备忘内容" />
+        <button onclick="addMemo()">添加</button>
+      </div>
+    </main>
+  </div>
+
+<script>
+async function loadMemos() {
+    const res = await fetch("/memos");
+    const memos = await res.json();
+    const list = document.getElementById("memoList");
+    list.innerHTML = "";
+    memos.forEach(m => {
+        const li = document.createElement("li");
+        li.textContent = `${m.time} - ${m.content}`;
+        list.appendChild(li);
+    });
+}
+
+async function addMemo() {
+    const input = document.getElementById("memoInput");
+    const content = input.value.trim();
+    if (!content) return alert("请输入备忘内容");
+
+    const res = await fetch("/memos", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({content})
+    });
+
+    const result = await res.json();
+    if (result.success) {
+        input.value = "";
+        loadMemos();
+    } else {
+        alert("添加失败");
+    }
+}
+
+loadMemos();
+</script>
+</body>
+</html>
