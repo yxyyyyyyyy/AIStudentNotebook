@@ -40,6 +40,9 @@ def _send_email_async(to_email: str, msg: MIMEText):
         logger.error(f"异步邮件发送失败: {e}", exc_info=True)
 @mcp.tool()
 def send_mail(to: str, subject: str, content: str) -> dict:
+    """
+    向指定邮箱发送邮件。如果只传入数字字符串，则自动识别为QQ号，拼成QQ邮箱地址。
+    """
     try:
         to_email = f"{to}@qq.com" if to.isdigit() else to
 
