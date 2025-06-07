@@ -39,9 +39,7 @@ if __name__ == "__main__":
     ACCESS_TOKEN = "pat_NmS1sj4WlA8Znn5DKivPYnkC8qzQlSuaJ6yDElMoF97O7tcrE8zCdCKSWQChijuC"
     WORKFLOW_ID = "7513027836551512079"
     PARAMETERS = {
-        "content": "撒野",
-        "user_id": "12345",
-        "user_name": "George"
+        "content": "全球高考"
     }
 
 
