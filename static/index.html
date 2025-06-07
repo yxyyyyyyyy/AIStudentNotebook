@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>备忘录 - 代办卡片风格</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 整体布局，左右两栏 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 左侧栏淡蓝色背景 */
+        .sidebar {
+            width: 280px;
+            background: #d6e9ff; /* 淡蓝色 */
+            color: #1a3e72;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+
+        .sidebar h1 {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .memo-list {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .memo-item {
+            background: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .memo-item:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .memo-item h3 {
+            margin: 0 0 5px 0;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .memo-item p {
+            margin: 0;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .memo-item.selected {
+            border-left: 4px solid #4a90e2;
+        }
+
+        .memo-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .btn {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #3a7bc8;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+
+        .btn-warning {
+            background: #f39c12;
+        }
+
+        .btn-warning:hover {
+            background: #d35400;
+        }
+
+        /* 右侧内容区 */
+        .content {
+            flex-grow: 1;
+            padding: 30px;
+            background: #f9fafc;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .content-header h2 {
+            margin: 0;
+            color: #333;
+        }
+
+        .memo-form {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .memo-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .memo-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+
+        .memo-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+        }
+
+        .memo-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .memo-card p {
+            margin: 0;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .memo-card .date {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 15px;
+            text-align: right;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 0;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: #4a90e2;
+            color: white;
+            border-radius: 4px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .notification.success {
+            background: #2ecc71;
+        }
+
+        .notification.error {
+            background: #e74c3c;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 40vh;
+            }
+            
+            .memo-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 左侧菜单栏 -->
+        <div class="sidebar">
+            <h1>我的备忘录</h1>
+            <div class="memo-list" id="memoList">
+                <!-- 备忘录列表将通过JS动态生成 -->
+            </div>
+        </div>
+
+        <!-- 右侧内容区 -->
+        <div class="content">
+            <div class="content-header">
+                <h2 id="contentTitle">添加新备忘录</h2>
+            </div>
+
+            <!-- 备忘录表单 -->
+            <div class="memo-form">
+                <div class="form-group">
+                    <label for="memoTitle">标题</label>
+                    <input type="text" id="memoTitle" placeholder="输入备忘录标题">
+                </div>
+                <div class="form-group">
+                    <label for="memoContent">内容</label>
+                    <textarea id="memoContent" placeholder="输入备忘录内容"></textarea>
+                </div>
+                <div class="memo-actions">
+                    <button id="saveMemo" class="btn">保存</button>
+                    <button id="cancelEdit" class="btn btn-warning" style="display: none;">取消编辑</button>
+                    <button id="deleteMemo" class="btn btn-danger" style="display: none;">删除</button>
+                </div>
+            </div>
+
+            <!-- 备忘录卡片展示区 -->
+            <div class="memo-cards" id="memoCards">
+                <!-- 备忘录卡片将通过JS动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知提示 -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // 初始化假数据
+        let memos = JSON.parse(localStorage.getItem('memos')) || [
+            {
+                id: 1,
+                title: '完成项目报告',
+                content: '需要在周五前完成季度项目进度报告，包括所有功能开发情况和测试结果。',
+                time: '2023-06-15 09:30:00'
+            },
+            {
+                id: 2,
+                title: '购买生日礼物',
+                content: '妈妈下周生日，需要提前准备礼物。考虑买一条围巾或者一本她喜欢的书。',
+                time: '2023-06-16 14:20:00'
+            },
+            {
+                id: 3,
+                title: '安排团队会议',
+                content: '下周一需要安排团队会议讨论新项目计划，准备会议议程和演示文稿。',
+                time: '2023-06-17 11:45:00'
+            }
+        ];
+
+        // 当前选中的备忘录ID
+        let selectedMemoId = null;
+
+        // DOM元素
+        const memoList = document.getElementById('memoList');
+        const memoCards = document.getElementById('memoCards');
+        const memoTitle = document.getElementById('memoTitle');
+        const memoContent = document.getElementById('memoContent');
+        const saveMemoBtn = document.getElementById('saveMemo');
+        const cancelEditBtn = document.getElementById('cancelEdit');
+        const deleteMemoBtn = document.getElementById('deleteMemo');
+        const contentTitle = document.getElementById('contentTitle');
+        const notification = document.getElementById('notification');
+
+        // 显示通知
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.className = 'notification';
+            }, 3000);
+        }
+
+        // 生成唯一ID
+        function generateId() {
+            return Date.now();
+        }
+
+        // 格式化日期时间
+        function formatDateTime(date) {
+            const d = new Date(date);
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+        }
+
+        // 渲染左侧备忘录列表
+        function renderMemoList() {
+            memoList.innerHTML = '';
+            
+            if (memos.length === 0) {
+                memoList.innerHTML = '<div class="empty-state"><i class="fas fa-sticky-note"></i><p>暂无备忘录</p></div>';
+                return;
+            }
+            
+            memos.forEach(memo => {
+                const memoItem = document.createElement('div');
+                memoItem.className = `memo-item ${memo.id === selectedMemoId ? 'selected' : ''}`;
+                memoItem.innerHTML = `
+                    <h3>${memo.time}</h3>
+                    <p>${memo.title}</p>
+                `;
+                memoItem.addEventListener('click', () => selectMemo(memo.id));
+                memoList.appendChild(memoItem);
+            });
+        }
+
+        // 渲染右侧备忘录卡片
+        function renderMemoCards() {
+            memoCards.innerHTML = '';
+            
+            if (memos.length === 0) {
+                memoCards.innerHTML = '<div class="empty-state"><i class="fas fa-sticky-note"></i><p>暂无备忘录，请添加新的备忘录</p></div>';
+                return;
+            }
+            
+            memos.forEach(memo => {
+                const memoCard = document.createElement('div');
+                memoCard.className = 'memo-card';
+                memoCard.innerHTML = `
+                    <h3>${memo.title}</h3>
+                    <p>${memo.content}</p>
+                    <div class="date">${memo.time}</div>
+                `;
+                memoCards.appendChild(memoCard);
+            });
+        }
+
+        // 选择备忘录进行编辑
+        function selectMemo(id) {
+            selectedMemoId = id;
+            const memo = memos.find(m => m.id === id);
+            
+            if (memo) {
+                contentTitle.textContent = '编辑备忘录';
+                memoTitle.value = memo.title;
+                memoContent.value = memo.content;
+                saveMemoBtn.textContent = '更新';
+                cancelEditBtn.style.display = 'inline-block';
+                deleteMemoBtn.style.display = 'inline-block';
+            }
+            
+            renderMemoList();
+        }
+
+        // 取消编辑
+        function cancelEdit() {
+            selectedMemoId = null;
+            resetForm();
+            renderMemoList();
+        }
+
+        // 重置表单
+        function resetForm() {
+            contentTitle.textContent = '添加新备忘录';
+            memoTitle.value = '';
+            memoContent.value = '';
+            saveMemoBtn.textContent = '保存';
+            cancelEditBtn.style.display = 'none';
+            deleteMemoBtn.style.display = 'none';
+        }
+
+        // 保存备忘录
+        function saveMemo() {
+            const title = memoTitle.value.trim();
+            const content = memoContent.value.trim();
+            
+            if (!title || !content) {
+                showNotification('标题和内容不能为空', 'error');
+                return;
+            }
+            
+            if (selectedMemoId) {
+                // 更新现有备忘录
+                const index = memos.findIndex(m => m.id === selectedMemoId);
+                if (index !== -1) {
+                    memos[index].title = title;
+                    memos[index].content = content;
+                    showNotification('备忘录已更新');
+                }
+            } else {
+                // 添加新备忘录
+                const newMemo = {
+                    id: generateId(),
+                    title,
+                    content,
+                    time: formatDateTime(new Date())
+                };
+                memos.unshift(newMemo);
+                showNotification('备忘录已添加');
+            }
+            
+            // 保存到本地存储
+            localStorage.setItem('memos', JSON.stringify(memos));
+            
+            // 重置表单和状态
+            cancelEdit();
+            renderMemoCards();
+        }
+
+        // 删除备忘录
+        function deleteMemo() {
+            if (!selectedMemoId) return;
+            
+            if (confirm('确定要删除这条备忘录吗？')) {
+                memos = memos.filter(m => m.id !== selectedMemoId);
+                localStorage.setItem('memos', JSON.stringify(memos));
+                showNotification('备忘录已删除');
+                cancelEdit();
+                renderMemoCards();
+            }
+        }
+
+        // 初始化应用
+        function initApp() {
+            renderMemoList();
+            renderMemoCards();
+            
+            // 添加事件监听器
+            saveMemoBtn.addEventListener('click', saveMemo);
+            cancelEditBtn.addEventListener('click', cancelEdit);
+            deleteMemoBtn.addEventListener('click', deleteMemo);
+        }
+
+        // 启动应用
+        initApp();
+    </script>
+</body>
+</html>
