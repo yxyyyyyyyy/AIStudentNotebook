@@ -20,54 +20,64 @@ logger = logging.getLogger("hitokoto")
 # MCP 初始化
 mcp = FastMCP("Hitokoto")
 
-# 类型映射字典
-CATE_MAP = {
-    "a": "动画",
-    "b": "漫画",
-    "c": "游戏",
-    "d": "小说",
-    "e": "原创",
-    "f": "网络",
-    "g": "其他",
-    "h": "影视",
-    "i": "诗词",
-    "j": "网易云",
-    "k": "哲学",
-    "l": "抖机灵"
-}
-
 @mcp.tool()
-def get_hitokoto(cate: str = None) -> dict:
+def ask_coze_bot(content: str) -> dict:
     """
-    获取一条随机一言。
+    向 Coze 智能体提问并获取回复。
+    关键词：coze 提问 
+
     参数:
-    - cate: 一言类型，可选值:
-      a(动画), b(漫画), c(游戏), d(小说), e(原创), f(网络),
-      g(其他), h(影视), i(诗词), j(网易云), k(哲学), l(抖机灵)
+    - content: 用户提出的问题内容
+
     返回:
-    - 包含一言内容、来源等信息的字典
+    - 包含 Coze 智能体的回复内容
     """
     try:
-        params = {}
-        if cate:
-            if cate not in CATE_MAP:
-                return {"success": False, "message": "不支持的类型代号，请输入 a-l 之间的字母。"}
-            params["c"] = cate
+        if not content.strip():
+            return {"success": False, "message": "请输入有效的问题。"}
 
-        response = requests.get("https://v1.hitokoto.cn", params=params)
+        url = "https://api.coze.cn/v3/chat"
+
+        headers = {
+            "Authorization": "pat_HuBOMiBbObhQAID8wMxTRV08BuaNkNpGA3UnkpwGR4FdG6lxafMaUJzIiIHLOGS9",  # ⚠️ 请替换为你的真实 pat_xxx 访问密钥
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "bot_id": "7513017678085537804",  # ✅ 你的 Coze Bot ID
+            "user_id": "123456",              # 可改为用户ID或用户session ID
+            "stream": False,
+            "auto_save_history": True,
+            "additional_messages": [
+                {
+                    "role": "user",
+                    "content": content,
+                    "content_type": "text"
+                }
+            ]
+        }
+
+        response = requests.post(url, headers=headers, json=payload)
         response.raise_for_status()
         data = response.json()
 
+        # 提取 assistant 回复内容
+        reply = ""
+        for msg in data.get("messages", []):
+            if msg.get("role") == "assistant":
+                reply = msg.get("content", "")
+                break
+
         return {
             "success": True,
-            "hitokoto": data.get("hitokoto", ""),
-            "from": data.get("from", ""),
-            "creator": data.get("creator", ""),
-            "type": CATE_MAP.get(data.get("type", ""), "未知")
+            "question": content,
+            "answer": reply or "未获取到回答"
         }
+
     except Exception as e:
-        logger.error(f"获取一言失败: {e}")
-        return {"success": False, "message": "获取一言失败"}
+        logger.error(f"Coze 智能体请求失败: {e}")
+        return {"success": False, "message": "请求失败"}
+
 
 if __name__ == "__main__":
     print("Hitokoto MCP backend started.")
