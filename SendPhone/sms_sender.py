@@ -1,3 +1,4 @@
+# 发送短信mcp 亿万科技
 from mcp.server.fastmcp import FastMCP
 import requests
 import logging
