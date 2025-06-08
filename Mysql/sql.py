@@ -1,3 +1,4 @@
+# 实现mysql数据库增删改查
 import logging
 import pymysql
 from datetime import datetime
