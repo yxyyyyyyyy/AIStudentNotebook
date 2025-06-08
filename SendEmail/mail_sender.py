@@ -1,3 +1,4 @@
+# 发送qq邮箱 需要授权码 但是会有qq发送和mcp联通的线程问题
 from mcp.server.fastmcp import FastMCP
 import smtplib
 from email.mime.text import MIMEText
