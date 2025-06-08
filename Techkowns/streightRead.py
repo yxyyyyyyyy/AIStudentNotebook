@@ -1,3 +1,4 @@
+# 本地知识库-利用分割文本向量模型对本地文本文件操作建立向量知识库进行搜索
 from fastapi import FastAPI, Query as FastQuery
 from sentence_transformers import SentenceTransformer
 import faiss
