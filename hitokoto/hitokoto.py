@@ -1,3 +1,4 @@
+# 获取一条随机一言。
 import logging
 import requests
 from mcp.server.fastmcp import FastMCP
