@@ -4,7 +4,7 @@ import tempfile
 import os
 import logging
 import threading
-import pygame  # 替代 playsound
+import pygame  
 
 # 初始化 MCP 和日志
 mcp = FastMCP("MusicPlayer")
@@ -14,6 +14,7 @@ _LOCK = threading.Lock()
 # 初始化 pygame 音频模块
 pygame.mixer.init()
 
+# 实现本地播放音乐,不过是从电脑端输出的音乐
 _API_URL = 'https://api.yaohud.cn/api/music/wy'
 _API_KEY = 'gKdP4sECc4NbbVxz868'
 
@@ -30,13 +31,11 @@ def _play_music_thread(temp_path: str):
         os.unlink(temp_path)  # 播放完成后删除临时文件
 
 @mcp.tool()
-def play_music(song_name: str) -> str:
+def 播放音乐(song_name: str) -> str:
     """
-    关键字:我想听
-    播放歌曲只用这个方法进行搜索,不许用search_music方法
-    通过 MCP 接口播放音乐（线程安全）
+    通过MCP接口播放音乐（线程安全）
     Args:
-        song_name: 歌曲名
+        song_name: 歌曲名，默认为"好运来"
     Returns:
         str: 播放结果或错误信息
     """
@@ -68,5 +67,5 @@ def play_music(song_name: str) -> str:
 
 
 if __name__ == "__main__":
-    mcp.run(transport="stdio")
     logger.info("正在启动音乐播放服务")
+    mcp.run(transport="stdio")
