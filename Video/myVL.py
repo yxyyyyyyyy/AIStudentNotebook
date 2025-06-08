@@ -11,6 +11,8 @@ from mcp.server.fastmcp import FastMCP
 from openai import OpenAI, APIConnectionError, APIError
 import sys
 import io
+
+# 实现外置摄像头，不是小智本身的，是电脑上的摄像头进行物体识别，但是跟电脑性能有关系，可能会超时
 # sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 # sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
