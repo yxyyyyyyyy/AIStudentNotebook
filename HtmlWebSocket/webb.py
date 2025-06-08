@@ -1,3 +1,4 @@
+# 用文件变更监视器的方式实现实时通知刷新前端页面
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 import asyncio
 import json
