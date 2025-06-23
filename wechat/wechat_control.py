@@ -27,6 +27,43 @@ WECHAT_PROCESS_NAME = "WeChat.exe"
 WECHAT_APP_NAME = "微信"
 MOMENTS_ICON_PATH = "resources/icons/wechat_moments_icon.png"  # 朋友圈图标截图路径
 
+# 依赖检测
+def check_dependencies():
+    missing = []
+    available = {}
+    try:
+        import win32gui
+        import win32con
+        available['win32gui'] = True
+    except ImportError:
+        missing.append('pywin32')
+        available['win32gui'] = False
+    try:
+        import pyautogui
+        available['pyautogui'] = True
+    except ImportError:
+        missing.append('pyautogui')
+        available['pyautogui'] = False
+    try:
+        import pyperclip
+        available['pyperclip'] = True
+    except ImportError:
+        missing.append('pyperclip')
+        available['pyperclip'] = False
+    try:
+        import pytesseract
+        from PIL import ImageGrab
+        available['ocr'] = True
+    except ImportError:
+        missing.append('pytesseract pillow')
+        available['ocr'] = False
+
+    return {
+        'available': available,
+        'missing': missing,
+        'all_available': len(missing) == 0
+    }
+
 # 子进程执行
 def safe_subprocess_run(cmd, **kwargs):
     try:
@@ -100,6 +137,27 @@ def activate_wechat_window():
     except:
         return False
 
+# 图像识别点击
+def find_and_click_image(template_path, confidence=0.85):
+    import pyautogui
+    if not os.path.exists(template_path):
+        return False
+    location = pyautogui.locateCenterOnScreen(template_path, confidence=confidence, grayscale=True)
+    if location:
+        pyautogui.moveTo(location)
+        pyautogui.click()
+        return True
+    return False
+
+# OCR 检测
+def ocr_window_text(region=None):
+    from PIL import ImageGrab
+    import pytesseract
+    img = ImageGrab.grab(bbox=region) if region else ImageGrab.grab()
+    text = pytesseract.image_to_string(img, lang='chi_sim+eng')
+    return text.strip()
+
+
 @mcp.tool()
 def open_wechat() -> dict:
     try:
@@ -124,7 +182,7 @@ def send_wechat_message(contact_name: str, message: str) -> dict:
         if not result["success"]:
             return result
 
-        time.sleep(1)  # 等聊天框稳定后再粘贴
+        time.sleep(1.5)  # 等聊天框稳定后再粘贴
 
         pyperclip.copy(message)
         pyautogui.hotkey('ctrl', 'v')
@@ -153,20 +211,20 @@ def open_wechat_chat(contact_name: str) -> dict:
 
         # 打开搜索框
         pyautogui.hotkey('ctrl', 'f')
-        time.sleep(1)
+        time.sleep(0.8)
 
         # 粘贴联系人名
         pyperclip.copy(contact_name)
         pyautogui.hotkey('ctrl', 'v')
-        time.sleep(1)
+        time.sleep(1.2)
 
         # 第一次回车选中高亮项
         pyautogui.press('enter')
-        time.sleep(1)
+        time.sleep(0.8)
 
         # 再次回车以进入聊天框
         pyautogui.press('enter')
-        time.sleep(1)
+        time.sleep(0.8)
 
         return {"success": True, "message": f"已尝试进入联系人“{contact_name}”的聊天窗口"}
 
