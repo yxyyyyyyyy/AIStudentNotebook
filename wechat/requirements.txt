@@ -1,0 +1,11 @@
+# 微信控制工具依赖包
+mcp>=1.0.0
+fastmcp>=0.1.0
+
+# UI自动化相关
+pyautogui>=0.9.54
+pyperclip>=1.8.2
+pywin32>=306
+
+# 基础依赖
+requests>=2.31.0 
