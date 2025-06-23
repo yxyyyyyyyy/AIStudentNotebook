@@ -157,6 +157,22 @@ def ocr_window_text(region=None):
     text = pytesseract.image_to_string(img, lang='chi_sim+eng')
     return text.strip()
 
+@mcp.tool()
+def open_wechat_moments() -> dict:
+    try:
+        if not open_wechat()["success"]:
+            return {"success": False, "message": "微信未成功打开"}
+        if not activate_wechat_window():
+            return {"success": False, "message": "激活窗口失败"}
+
+        time.sleep(2)
+        if find_and_click_image(MOMENTS_ICON_PATH):
+            time.sleep(2)
+            text = ocr_window_text()
+            return {"success": True, "message": f"已点击朋友圈图标，当前OCR页面识别：{text}"}
+        return {"success": False, "message": "未找到朋友圈图标"}
+    except Exception as e:
+        return {"success": False, "message": f"打开朋友圈失败: {e}"}
 
 @mcp.tool()
 def open_wechat() -> dict:
@@ -233,4 +249,11 @@ def open_wechat_chat(contact_name: str) -> dict:
         return {"success": False, "message": f"打开联系人对话框失败: {str(e)}"}
 
 if __name__ == "__main__":
+    print("✅ WeChat Control (Advanced) 启动成功")
+    deps = check_dependencies()
+    if not deps['all_available']:
+        print("❌ 缺少依赖：", ", ".join(deps['missing']))
+        print("建议运行：pip install " + " ".join(deps['missing']))
+    else:
+        print("✅ 所有依赖已安装")
     mcp.run(transport="stdio")
